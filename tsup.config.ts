@@ -5,7 +5,7 @@ export default defineConfig([
   {
     entry: ['src/index.ts'],
     format: ['esm', 'cjs'],
-    dts: true,
+    dts: false, // Types generated separately via tsc
     sourcemap: true,
     clean: true,
     external: ['react', 'react-dom'],
@@ -21,7 +21,7 @@ export default defineConfig([
     entry: ['src/core/index.ts'],
     outDir: 'dist/core',
     format: ['esm', 'cjs'],
-    dts: true,
+    dts: false, // Types generated separately via tsc
     sourcemap: true,
     clean: false,
     treeshake: true,

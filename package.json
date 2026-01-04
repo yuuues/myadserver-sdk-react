@@ -8,34 +8,25 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
-      },
-      "require": {
-        "types": "./dist/index.d.cts",
-        "default": "./dist/index.cjs"
-      }
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
     },
     "./core": {
-      "import": {
-        "types": "./dist/core/index.d.ts",
-        "default": "./dist/core/index.js"
-      },
-      "require": {
-        "types": "./dist/core/index.d.cts",
-        "default": "./dist/core/index.cjs"
-      }
+      "types": "./dist/core/index.d.ts",
+      "import": "./dist/core/index.js",
+      "require": "./dist/core/index.cjs"
     }
   },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsup",
+    "build": "tsup && npm run build:types",
+    "build:js": "tsup",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src --ext .ts,.tsx",
     "prepare": "npm run build",
     "prepublishOnly": "npm run build"
   },
