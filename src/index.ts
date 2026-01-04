@@ -1,11 +1,11 @@
 /**
- * @my-org/ad-sdk
+ * @yuuues/ad-sdk
  *
  * Ad Server SDK with React adapter
  *
  * @example
  * ```tsx
- * import { AdProvider, AdUnit } from '@my-org/ad-sdk';
+ * import { AdProvider, AdUnit } from '@yuuues/ad-sdk';
  *
  * function App() {
  *   return (

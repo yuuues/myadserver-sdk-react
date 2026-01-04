@@ -1,4 +1,4 @@
-# @my-org/ad-sdk
+# @yuuues/ad-sdk-react
 
 SDK para consumir el Ad Server con soporte para React.
 
@@ -9,7 +9,7 @@ SDK para consumir el Ad Server con soporte para React.
 npm install github:yuuues/myadserver-sdk-react
 
 # Desde npm (si está publicado)
-npm install @my-org/ad-sdk
+npm install @yuuues/ad-sdk-react
 ```
 
 ## Uso con React
@@ -19,7 +19,7 @@ npm install @my-org/ad-sdk
 Envuelve tu aplicación con `AdProvider`:
 
 ```tsx
-import { AdProvider } from '@my-org/ad-sdk';
+import { AdProvider } from '@yuuues/ad-sdk-react';
 
 function App() {
   return (
@@ -39,7 +39,7 @@ function App() {
 ### 2. Mostrar anuncios con AdUnit
 
 ```tsx
-import { AdUnit } from '@my-org/ad-sdk';
+import { AdUnit } from '@yuuues/ad-sdk-react';
 
 function MiPagina() {
   return (
@@ -69,7 +69,7 @@ function MiPagina() {
 ### 3. Uso avanzado con el hook useAd
 
 ```tsx
-import { useAd } from '@my-org/ad-sdk';
+import { useAd } from '@yuuues/ad-sdk-react';
 
 function MiComponentePersonalizado() {
   const { data, loading, error, refetch } = useAd('mi-zona', {
@@ -97,7 +97,7 @@ function MiComponentePersonalizado() {
 ### 4. Acceso directo al cliente
 
 ```tsx
-import { useAdClient } from '@my-org/ad-sdk';
+import { useAdClient } from '@yuuues/ad-sdk-react';
 
 function MiComponente() {
   const client = useAdClient();
@@ -119,7 +119,7 @@ function MiComponente() {
 Para usar el SDK sin React (vanilla JS/TS):
 
 ```typescript
-import { AdClient } from '@my-org/ad-sdk/core';
+import { AdClient } from '@yuuues/ad-sdk/core';
 
 const client = new AdClient({
   apiUrl: 'https://tu-adserver.com',
@@ -194,7 +194,7 @@ interface AdResponse {
 ### AdError
 
 ```typescript
-import { AdError, AdErrorCode } from '@my-org/ad-sdk';
+import { AdError, AdErrorCode } from '@yuuues/ad-sdk-react';
 
 // Códigos de error disponibles:
 AdErrorCode.NETWORK_ERROR    // Error de red

@@ -1,5 +1,5 @@
 {
-  "name": "@my-org/ad-sdk",
+  "name": "@yuuues/ad-sdk-react",
   "version": "1.0.0",
   "description": "Ad Server SDK with React adapter",
   "type": "module",
@@ -61,7 +61,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/my-org/ad-sdk.git"
+    "url": "https://github.com/yuuues/myadserver-sdk-react.git"
   },
   "engines": {
     "node": ">=18.0.0"
