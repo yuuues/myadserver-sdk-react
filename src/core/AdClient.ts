@@ -120,7 +120,12 @@ export class AdClient {
     }
 
     try {
-      const url = new URL(`${this.config.apiUrl}/api/v1/decision`);
+      // Build URL - supports both absolute and relative URLs
+      const baseUrl = this.config.apiUrl.startsWith('http')
+        ? this.config.apiUrl
+        : `${typeof window !== 'undefined' ? window.location.origin : ''}${this.config.apiUrl}`;
+
+      const url = new URL(`${baseUrl}/decision`);
       url.searchParams.set('zone', zoneSlug);
 
       // Add context parameters if provided
@@ -243,7 +248,7 @@ export class AdClient {
     console.debug(`[AdSDK] Tracking impression for ad ID: ${adId}`, options);
 
     try {
-      const url = `${this.config.apiUrl}/api/v1/track/impression`;
+      const url = `${this.config.apiUrl}/track/impression`;
 
       const body: Record<string, unknown> = {
         ad_id: adId,
@@ -308,7 +313,7 @@ export class AdClient {
     console.debug(`[AdSDK] Tracking click for ad ID: ${adId}`);
 
     try {
-      const url = `${this.config.apiUrl}/api/v1/track/click`;
+      const url = `${this.config.apiUrl}/track/click`;
 
       const body = {
         ad_id: adId,
