@@ -1,4 +1,4 @@
-# @yuuues/ad-sdk-react
+# @yuuues/myadserver-sdk-react
 
 SDK para consumir el Ad Server con soporte para React.
 

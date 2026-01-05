@@ -1,5 +1,5 @@
 {
-  "name": "@yuuues/ad-sdk-react",
+  "name": "@yuuues/myadserver-sdk-react",
   "version": "1.0.0",
   "description": "Ad Server SDK with React adapter",
   "type": "module",
