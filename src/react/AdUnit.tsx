@@ -85,11 +85,10 @@ function DefaultSkeleton({ className, style }: { className?: string; style?: CSS
 }
 
 /**
- * Injects third-party ad scripts inside a sandboxed iframe.
- * Uses srcdoc WITHOUT allow-same-origin so the iframe gets a unique opaque
- * origin, bypassing the parent page's CSP. Ad network scripts can then
- * load external resources freely. document.write() also works because
- * the iframe document is freshly created by srcdoc.
+ * Injects third-party ad scripts inside an iframe using a data: URI.
+ * - srcdoc inherits the parent's CSP (per spec) → blocks external scripts
+ * - data: URIs create a unique opaque origin with NO inherited CSP
+ * - Ad network scripts (which often use document.write) work freely
  */
 function injectScripts(container: HTMLElement, html: string, width?: number, height?: number): void {
   const iframe = document.createElement('iframe');
@@ -99,8 +98,10 @@ function injectScripts(container: HTMLElement, html: string, width?: number, hei
   iframe.width = width ? String(width) : '300';
   iframe.height = height ? String(height) : '250';
   iframe.scrolling = 'no';
-  iframe.setAttribute('sandbox', 'allow-scripts allow-popups allow-popups-to-navigate-by-user-activation');
-  iframe.srcdoc = `<!doctype html><html><head></head><body style="margin:0;overflow:hidden">${html}</body></html>`;
+  iframe.setAttribute('sandbox', 'allow-scripts allow-popups');
+
+  const doc = `<!doctype html><html><head></head><body style="margin:0;overflow:hidden">${html}</body></html>`;
+  iframe.src = `data:text/html;charset=utf-8,${encodeURIComponent(doc)}`;
 
   container.appendChild(iframe);
 }

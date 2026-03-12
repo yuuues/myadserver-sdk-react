@@ -1,6 +1,6 @@
 {
   "name": "@yuuues/myadserver-sdk-react",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "Ad Server SDK with React adapter",
   "type": "module",
   "main": "./dist/index.cjs",

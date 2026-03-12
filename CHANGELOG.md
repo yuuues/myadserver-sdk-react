@@ -2,6 +2,13 @@
 
 All notable changes to `@yuuues/myadserver-sdk-react` will be documented in this file.
 
+## [2.0.3] - 2026-03-12
+
+### Changed
+
+- **Switch from `srcdoc` to `data:` URI**: `srcdoc` inherits the parent page's CSP (per spec), which can block external scripts from ad networks. `data:` URIs create an opaque origin with no inherited CSP, allowing ad scripts to load resources freely.
+- **Simplified sandbox**: Reduced to `allow-scripts allow-popups` — removed `allow-popups-to-navigate-by-user-activation` (unnecessary; ad click-throughs use `_blank` which `allow-popups` covers).
+
 ## [2.0.2] - 2026-03-12
 
 ### Changed
