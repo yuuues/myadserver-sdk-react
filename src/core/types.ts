@@ -16,14 +16,18 @@ export interface AdConfig {
 export interface AdResponse {
   /** Unique identifier for the ad */
   readonly id: number;
-  /** URL of the ad image to display */
-  readonly imageUrl: string;
-  /** URL to redirect when ad is clicked */
-  readonly destinationUrl: string;
+  /** Type of ad: image (traditional banner) or script (third-party ad network code) */
+  readonly type: 'image' | 'script';
+  /** URL of the ad image to display (image ads only) */
+  readonly imageUrl?: string;
+  /** URL to redirect when ad is clicked (image ads only) */
+  readonly destinationUrl?: string;
   /** Optional URL for tracking impressions */
   readonly trackingUrl?: string;
   /** Optional alt text for the image */
   readonly altText?: string;
+  /** Raw HTML/script content to inject (script ads only) */
+  readonly scriptContent?: string;
   /** Optional width of the ad unit */
   readonly width?: number;
   /** Optional height of the ad unit */
@@ -31,19 +35,33 @@ export interface AdResponse {
 }
 
 /**
- * Raw API response structure from the Ad Server
+ * Raw API response structure from the Ad Server.
+ * Supports both flat format (current backend) and wrapped format (future).
  */
 export interface AdApiResponse {
-  readonly success: boolean;
+  // --- Wrapped format fields ---
+  readonly success?: boolean;
   readonly data?: {
     readonly id: number;
-    readonly image_url: string;
-    readonly destination_url: string;
+    readonly type?: string;
+    readonly image_url?: string;
+    readonly destination_url?: string;
     readonly tracking_url?: string;
     readonly alt_text?: string;
+    readonly script_content?: string;
     readonly width?: number;
     readonly height?: number;
   };
+  // --- Flat format fields (current backend) ---
+  readonly id?: number;
+  readonly type?: string;
+  readonly imageUrl?: string;
+  readonly destinationUrl?: string;
+  readonly clickUrl?: string;
+  readonly scriptContent?: string;
+  readonly width?: number;
+  readonly height?: number;
+  // --- Error ---
   readonly error?: string;
 }
 

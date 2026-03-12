@@ -76,21 +76,39 @@ export class AdClient {
    * Transforms the API response to the internal AdResponse format
    */
   private transformResponse(apiResponse: AdApiResponse): AdResponse | null {
-    if (!apiResponse.success || !apiResponse.data) {
-      return null;
+    // Handle wrapped format: { success, data: {...} }
+    if (apiResponse.success !== undefined) {
+      if (!apiResponse.success || !apiResponse.data) {
+        return null;
+      }
+      const { data } = apiResponse;
+      return {
+        id: data.id,
+        type: (data.type as 'image' | 'script') ?? 'image',
+        imageUrl: data.image_url,
+        destinationUrl: data.destination_url,
+        trackingUrl: data.tracking_url,
+        altText: data.alt_text,
+        scriptContent: data.script_content,
+        width: data.width,
+        height: data.height,
+      };
     }
 
-    const { data } = apiResponse;
+    // Handle flat format: { id, type, imageUrl, ... }
+    if (apiResponse.id !== undefined) {
+      return {
+        id: apiResponse.id,
+        type: (apiResponse.type as 'image' | 'script') ?? 'image',
+        imageUrl: apiResponse.imageUrl,
+        destinationUrl: apiResponse.destinationUrl ?? apiResponse.clickUrl,
+        scriptContent: apiResponse.scriptContent,
+        width: apiResponse.width,
+        height: apiResponse.height,
+      };
+    }
 
-    return {
-      id: data.id,
-      imageUrl: data.image_url,
-      destinationUrl: data.destination_url,
-      trackingUrl: data.tracking_url,
-      altText: data.alt_text,
-      width: data.width,
-      height: data.height,
-    };
+    return null;
   }
 
   /**
@@ -126,7 +144,7 @@ export class AdClient {
         : `${typeof window !== 'undefined' ? window.location.origin : ''}${this.config.apiUrl}`;
 
       const url = new URL(`${baseUrl}/decision`);
-      url.searchParams.set('zone', zoneSlug);
+      url.searchParams.set('zone_slug', zoneSlug);
 
       // Add context parameters if provided
       if (options?.context) {
@@ -214,20 +232,21 @@ export class AdClient {
 
     const response = data as Record<string, unknown>;
 
-    if (typeof response['success'] !== 'boolean') {
-      return false;
+    // Wrapped format: { success, data: { id, ... } }
+    if (typeof response['success'] === 'boolean') {
+      if (response['data'] !== undefined) {
+        const adData = response['data'] as Record<string, unknown>;
+        return typeof adData['id'] === 'number';
+      }
+      return true;
     }
 
-    if (response['data'] !== undefined) {
-      const adData = response['data'] as Record<string, unknown>;
-      return (
-        typeof adData['id'] === 'number' &&
-        typeof adData['image_url'] === 'string' &&
-        typeof adData['destination_url'] === 'string'
-      );
+    // Flat format: { id, type, ... }
+    if (typeof response['id'] === 'number') {
+      return true;
     }
 
-    return true;
+    return false;
   }
 
   /**

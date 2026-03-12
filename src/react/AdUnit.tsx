@@ -1,4 +1,4 @@
-import {
+import React, {
   useEffect,
   useRef,
   useCallback,
@@ -51,6 +51,8 @@ export interface AdRenderProps {
   readonly height?: number;
   /** Whether the ad has been viewed */
   readonly isViewed: boolean;
+  /** Ad type (always 'image' in render props, since script ads return early) */
+  readonly type: 'image' | 'script';
 }
 
 /**
@@ -80,6 +82,40 @@ function DefaultSkeleton({ className, style }: { className?: string; style?: CSS
       </style>
     </div>
   );
+}
+
+/**
+ * Parses HTML string and injects scripts into a container element.
+ * Using innerHTML alone won't execute <script> tags, so we parse them
+ * and create proper script elements. Handles nested scripts recursively.
+ */
+function injectScripts(container: HTMLElement, html: string): void {
+  const temp = document.createElement('div');
+  temp.innerHTML = html;
+
+  function processNode(source: Node, target: HTMLElement): void {
+    const children = Array.from(source.childNodes);
+    for (const child of children) {
+      if (child instanceof HTMLScriptElement) {
+        const script = document.createElement('script');
+        for (const attr of Array.from(child.attributes)) {
+          script.setAttribute(attr.name, attr.value);
+        }
+        if (child.textContent) {
+          script.textContent = child.textContent;
+        }
+        target.appendChild(script);
+      } else if (child instanceof HTMLElement) {
+        const clone = child.cloneNode(false) as HTMLElement;
+        target.appendChild(clone);
+        processNode(child, clone);
+      } else {
+        target.appendChild(child.cloneNode(true));
+      }
+    }
+  }
+
+  processNode(temp, container);
 }
 
 /**
@@ -124,6 +160,7 @@ export function AdUnit({
 
   // Ref for the container element (for IntersectionObserver)
   const containerRef = useRef<HTMLDivElement>(null);
+  const scriptContainerRef = useRef<HTMLDivElement>(null);
 
   // Track whether impression has been counted
   const impressionTrackedRef = useRef(false);
@@ -150,7 +187,7 @@ export function AdUnit({
     // Check if IntersectionObserver is available
     if (typeof IntersectionObserver === 'undefined') {
       // Fallback: track impression immediately if observer not available
-      if (!impressionTrackedRef.current) {
+      if (!impressionTrackedRef.current && data.type !== 'script') {
         impressionTrackedRef.current = true;
         trackedAdIdRef.current = data.id;
         void client.trackImpression(data.id);
@@ -167,7 +204,8 @@ export function AdUnit({
         if (
           entry.isIntersecting &&
           entry.intersectionRatio >= impressionThreshold &&
-          !impressionTrackedRef.current
+          !impressionTrackedRef.current &&
+          data.type !== 'script'
         ) {
           impressionTrackedRef.current = true;
           trackedAdIdRef.current = data.id;
@@ -190,11 +228,25 @@ export function AdUnit({
     };
   }, [data, client, impressionThreshold]);
 
+  // Inject scripts for script-type ads
+  useEffect(() => {
+    if (data?.type !== 'script' || !data.scriptContent || !scriptContainerRef.current) {
+      return;
+    }
+
+    const container = scriptContainerRef.current;
+    injectScripts(container, data.scriptContent);
+
+    return () => {
+      container.innerHTML = '';
+    };
+  }, [data?.id, data?.type, data?.scriptContent]);
+
   /**
    * Handle ad click
    */
   const handleClick = useCallback(() => {
-    if (data) {
+    if (data && data.type !== 'script') {
       void client.trackClick(data.id);
     }
     onClick?.();
@@ -214,14 +266,36 @@ export function AdUnit({
     return fallback ? <>{fallback}</> : null;
   }
 
+  // Render script-type ads
+  if (data.type === 'script') {
+    return (
+      <div
+        ref={(el) => {
+          (containerRef as React.MutableRefObject<HTMLDivElement | null>).current = el;
+          (scriptContainerRef as React.MutableRefObject<HTMLDivElement | null>).current = el;
+        }}
+        className={className}
+        style={{
+          ...style,
+          width: data.width ? `${data.width}px` : undefined,
+          height: data.height ? `${data.height}px` : undefined,
+        }}
+        data-ad-id={data.id}
+        data-ad-zone={zone}
+        data-ad-type="script"
+      />
+    );
+  }
+
   // Prepare render props
   const renderProps: AdRenderProps = {
-    imageUrl: data.imageUrl,
-    destinationUrl: data.destinationUrl,
+    imageUrl: data.imageUrl ?? '',
+    destinationUrl: data.destinationUrl ?? '',
     altText: data.altText ?? 'Advertisement',
     width: data.width,
     height: data.height,
     isViewed: impressionTrackedRef.current,
+    type: data.type ?? 'image',
   };
 
   // Use custom render function if provided
@@ -241,6 +315,7 @@ export function AdUnit({
       style={style}
       data-ad-id={data.id}
       data-ad-zone={zone}
+      data-ad-type="image"
     >
       <a
         href={data.destinationUrl}
