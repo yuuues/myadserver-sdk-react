@@ -25,18 +25,17 @@ Single migration adding `type` (varchar, default `'image'`) and `script_content`
 
 ### Endpoint: `GET /api/v1/decision`
 
-Response includes `type` field. For script ads:
+Response includes `type` field. The backend returns a flat JSON object with camelCase keys (no `success`/`data` wrapper).
+
+For script ads:
 
 ```json
 {
-  "success": true,
-  "data": {
-    "id": 2,
-    "type": "script",
-    "script_content": "<script>atOptions = {...}</script><script src=\"https://...\"></script>",
-    "width": 300,
-    "height": 250
-  }
+  "id": 2,
+  "type": "script",
+  "scriptContent": "<script>atOptions = {...}</script><script src=\"https://...\"></script>",
+  "width": 300,
+  "height": 250
 }
 ```
 
@@ -44,16 +43,13 @@ For image ads (backward compatible, adds `type` field):
 
 ```json
 {
-  "success": true,
-  "data": {
-    "id": 1,
-    "type": "image",
-    "image_url": "https://...",
-    "destination_url": "https://...",
-    "click_url": "https://...",
-    "width": 300,
-    "height": 250
-  }
+  "id": 1,
+  "type": "image",
+  "imageUrl": "https://...",
+  "destinationUrl": "https://...",
+  "clickUrl": "https://...",
+  "width": 300,
+  "height": 250
 }
 ```
 
