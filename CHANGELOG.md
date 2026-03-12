@@ -2,6 +2,17 @@
 
 All notable changes to `@yuuues/myadserver-sdk-react` will be documented in this file.
 
+## [2.0.4] - 2026-03-12
+
+### Added
+
+- **Signed render URL**: Script ads now load via a server-rendered URL (`renderUrl`) with a short-lived HMAC token. The API key never appears in iframe URLs or browser logs.
+- **`renderUrl` field** on `AdResponse` and `AdApiResponse` — provided by the server for script-type ads.
+
+### Changed
+
+- **Iframe strategy**: When `renderUrl` is available (default), the iframe loads the signed server URL (CSP controlled server-side). Falls back to sandboxed `data:` URI when no render URL is present.
+
 ## [2.0.3] - 2026-03-12
 
 ### Changed

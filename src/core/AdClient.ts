@@ -90,6 +90,7 @@ export class AdClient {
         trackingUrl: data.tracking_url,
         altText: data.alt_text,
         scriptContent: data.script_content,
+        renderUrl: data.render_url,
         width: data.width,
         height: data.height,
       };
@@ -103,6 +104,7 @@ export class AdClient {
         imageUrl: apiResponse.imageUrl,
         destinationUrl: apiResponse.destinationUrl ?? apiResponse.clickUrl,
         scriptContent: apiResponse.scriptContent,
+        renderUrl: apiResponse.renderUrl,
         width: apiResponse.width,
         height: apiResponse.height,
       };

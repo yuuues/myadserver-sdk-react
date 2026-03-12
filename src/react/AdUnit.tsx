@@ -85,23 +85,32 @@ function DefaultSkeleton({ className, style }: { className?: string; style?: CSS
 }
 
 /**
- * Injects third-party ad scripts inside an iframe using a data: URI.
- * - srcdoc inherits the parent's CSP (per spec) → blocks external scripts
- * - data: URIs create a unique opaque origin with NO inherited CSP
- * - Ad network scripts (which often use document.write) work freely
+ * Creates an iframe for rendering script ads.
+ * When a signed renderUrl is available the server serves the HTML with its
+ * own permissive CSP, so no sandbox restrictions are needed on the iframe.
+ * Falls back to a sandboxed data: URI for standalone / offline usage.
  */
-function injectScripts(container: HTMLElement, html: string, width?: number, height?: number): void {
+function mountScriptAd(
+  container: HTMLElement,
+  opts: { renderUrl?: string; scriptContent?: string; width?: number; height?: number },
+): void {
   const iframe = document.createElement('iframe');
   iframe.style.border = 'none';
   iframe.style.overflow = 'hidden';
   iframe.style.display = 'block';
-  iframe.width = width ? String(width) : '300';
-  iframe.height = height ? String(height) : '250';
+  iframe.width = opts.width ? String(opts.width) : '300';
+  iframe.height = opts.height ? String(opts.height) : '250';
   iframe.scrolling = 'no';
-  iframe.setAttribute('sandbox', 'allow-scripts allow-popups');
 
-  const doc = `<!doctype html><html><head></head><body style="margin:0;overflow:hidden">${html}</body></html>`;
-  iframe.src = `data:text/html;charset=utf-8,${encodeURIComponent(doc)}`;
+  if (opts.renderUrl) {
+    // Server-rendered: CSP controlled server-side, no sandbox needed
+    iframe.src = opts.renderUrl;
+  } else if (opts.scriptContent) {
+    // Fallback: sandboxed data: URI (no inherited CSP)
+    iframe.setAttribute('sandbox', 'allow-scripts allow-popups');
+    const doc = `<!doctype html><html><head></head><body style="margin:0;overflow:hidden">${opts.scriptContent}</body></html>`;
+    iframe.src = `data:text/html;charset=utf-8,${encodeURIComponent(doc)}`;
+  }
 
   container.appendChild(iframe);
 }
@@ -216,19 +225,24 @@ export function AdUnit({
     };
   }, [data, client, impressionThreshold]);
 
-  // Inject scripts for script-type ads
+  // Mount iframe for script-type ads
   useEffect(() => {
-    if (data?.type !== 'script' || !data.scriptContent || !scriptContainerRef.current) {
+    if (data?.type !== 'script' || (!data.renderUrl && !data.scriptContent) || !scriptContainerRef.current) {
       return;
     }
 
     const container = scriptContainerRef.current;
-    injectScripts(container, data.scriptContent, data.width, data.height);
+    mountScriptAd(container, {
+      renderUrl: data.renderUrl,
+      scriptContent: data.scriptContent,
+      width: data.width,
+      height: data.height,
+    });
 
     return () => {
       container.innerHTML = '';
     };
-  }, [data?.id, data?.type, data?.scriptContent, data?.width, data?.height]);
+  }, [data?.id, data?.type, data?.renderUrl, data?.scriptContent, data?.width, data?.height]);
 
   /**
    * Handle ad click

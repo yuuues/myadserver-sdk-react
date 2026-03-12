@@ -28,6 +28,8 @@ export interface AdResponse {
   readonly altText?: string;
   /** Raw HTML/script content to inject (script ads only) */
   readonly scriptContent?: string;
+  /** Signed URL to render script ad in an iframe (script ads only) */
+  readonly renderUrl?: string;
   /** Optional width of the ad unit */
   readonly width?: number;
   /** Optional height of the ad unit */
@@ -49,6 +51,7 @@ export interface AdApiResponse {
     readonly tracking_url?: string;
     readonly alt_text?: string;
     readonly script_content?: string;
+    readonly render_url?: string;
     readonly width?: number;
     readonly height?: number;
   };
@@ -59,6 +62,7 @@ export interface AdApiResponse {
   readonly destinationUrl?: string;
   readonly clickUrl?: string;
   readonly scriptContent?: string;
+  readonly renderUrl?: string;
   readonly width?: number;
   readonly height?: number;
   // --- Error ---
