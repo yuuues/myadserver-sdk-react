@@ -85,37 +85,29 @@ function DefaultSkeleton({ className, style }: { className?: string; style?: CSS
 }
 
 /**
- * Parses HTML string and injects scripts into a container element.
- * Using innerHTML alone won't execute <script> tags, so we parse them
- * and create proper script elements. Handles nested scripts recursively.
+ * Injects third-party ad scripts inside an iframe.
+ * Ad networks commonly use document.write() which only works in a fresh
+ * document context — not in dynamically appended scripts after page load.
+ * An iframe provides that fresh context.
  */
-function injectScripts(container: HTMLElement, html: string): void {
-  const temp = document.createElement('div');
-  temp.innerHTML = html;
+function injectScripts(container: HTMLElement, html: string, width?: number, height?: number): void {
+  const iframe = document.createElement('iframe');
+  iframe.style.border = 'none';
+  iframe.style.overflow = 'hidden';
+  iframe.style.display = 'block';
+  iframe.width = width ? String(width) : '300';
+  iframe.height = height ? String(height) : '250';
+  iframe.scrolling = 'no';
+  iframe.setAttribute('sandbox', 'allow-scripts allow-popups allow-popups-to-navigate-by-user-activation allow-same-origin');
 
-  function processNode(source: Node, target: HTMLElement): void {
-    const children = Array.from(source.childNodes);
-    for (const child of children) {
-      if (child instanceof HTMLScriptElement) {
-        const script = document.createElement('script');
-        for (const attr of Array.from(child.attributes)) {
-          script.setAttribute(attr.name, attr.value);
-        }
-        if (child.textContent) {
-          script.textContent = child.textContent;
-        }
-        target.appendChild(script);
-      } else if (child instanceof HTMLElement) {
-        const clone = child.cloneNode(false) as HTMLElement;
-        target.appendChild(clone);
-        processNode(child, clone);
-      } else {
-        target.appendChild(child.cloneNode(true));
-      }
-    }
+  container.appendChild(iframe);
+
+  const doc = iframe.contentDocument ?? iframe.contentWindow?.document;
+  if (doc) {
+    doc.open();
+    doc.write(`<!doctype html><html><head></head><body style="margin:0;overflow:hidden">${html}</body></html>`);
+    doc.close();
   }
-
-  processNode(temp, container);
 }
 
 /**
@@ -235,12 +227,12 @@ export function AdUnit({
     }
 
     const container = scriptContainerRef.current;
-    injectScripts(container, data.scriptContent);
+    injectScripts(container, data.scriptContent, data.width, data.height);
 
     return () => {
       container.innerHTML = '';
     };
-  }, [data?.id, data?.type, data?.scriptContent]);
+  }, [data?.id, data?.type, data?.scriptContent, data?.width, data?.height]);
 
   /**
    * Handle ad click

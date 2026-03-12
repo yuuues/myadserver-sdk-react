@@ -2,6 +2,13 @@
 
 All notable changes to `@yuuues/myadserver-sdk-react` will be documented in this file.
 
+## [2.0.1] - 2026-03-12
+
+### Fixed
+
+- **Script ad injection**: Replaced direct DOM script injection with iframe-based approach. Ad networks that use `document.write()` now work correctly, as iframes provide the fresh document context they require.
+- Script container now respects `width` and `height` from the API response.
+
 ## [2.0.0] - 2026-03-12
 
 ### Added
