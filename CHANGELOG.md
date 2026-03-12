@@ -2,6 +2,13 @@
 
 All notable changes to `@yuuues/myadserver-sdk-react` will be documented in this file.
 
+## [2.0.2] - 2026-03-12
+
+### Changed
+
+- **Iframe sandbox hardened**: Removed `allow-same-origin` from sandbox attribute, giving script ads an opaque origin for stronger isolation.
+- **Switched to `srcdoc`**: Script injection now uses `iframe.srcdoc` instead of `doc.open()/doc.write()/doc.close()` for cleaner, more reliable content loading.
+
 ## [2.0.1] - 2026-03-12
 
 ### Fixed

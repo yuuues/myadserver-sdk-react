@@ -85,10 +85,11 @@ function DefaultSkeleton({ className, style }: { className?: string; style?: CSS
 }
 
 /**
- * Injects third-party ad scripts inside an iframe.
- * Ad networks commonly use document.write() which only works in a fresh
- * document context — not in dynamically appended scripts after page load.
- * An iframe provides that fresh context.
+ * Injects third-party ad scripts inside a sandboxed iframe.
+ * Uses srcdoc WITHOUT allow-same-origin so the iframe gets a unique opaque
+ * origin, bypassing the parent page's CSP. Ad network scripts can then
+ * load external resources freely. document.write() also works because
+ * the iframe document is freshly created by srcdoc.
  */
 function injectScripts(container: HTMLElement, html: string, width?: number, height?: number): void {
   const iframe = document.createElement('iframe');
@@ -98,16 +99,10 @@ function injectScripts(container: HTMLElement, html: string, width?: number, hei
   iframe.width = width ? String(width) : '300';
   iframe.height = height ? String(height) : '250';
   iframe.scrolling = 'no';
-  iframe.setAttribute('sandbox', 'allow-scripts allow-popups allow-popups-to-navigate-by-user-activation allow-same-origin');
+  iframe.setAttribute('sandbox', 'allow-scripts allow-popups allow-popups-to-navigate-by-user-activation');
+  iframe.srcdoc = `<!doctype html><html><head></head><body style="margin:0;overflow:hidden">${html}</body></html>`;
 
   container.appendChild(iframe);
-
-  const doc = iframe.contentDocument ?? iframe.contentWindow?.document;
-  if (doc) {
-    doc.open();
-    doc.write(`<!doctype html><html><head></head><body style="margin:0;overflow:hidden">${html}</body></html>`);
-    doc.close();
-  }
 }
 
 /**
